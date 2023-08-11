@@ -143,6 +143,10 @@ func NewDefaultRedisCache(dsn string) RedisCache[string, string] {
 	return &DefaultRedisCacheImpl[string, string]{r: redis.NewClient(redisOptions)}
 }
 
+func NewDefaultRedisCacheV2(cli *redis.Client) RedisCache[string, string] {
+	return &DefaultRedisCacheImpl[string, string]{r: cli}
+}
+
 func NewDefaultFusionCache(dsn string, defaultExpiration, cleanupInterval time.Duration) *FusionCache[string, string] {
 	return New(NewDefaultMemoryCache(defaultExpiration, cleanupInterval), NewDefaultRedisCache(dsn))
 }
