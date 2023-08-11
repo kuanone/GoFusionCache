@@ -1,4 +1,4 @@
-package fusion_cache
+package GoFusionCache
 
 import (
 	"context"
