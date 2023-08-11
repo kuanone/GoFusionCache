@@ -2,9 +2,10 @@ package fusion_cache
 
 import (
 	"context"
-	gocache "github.com/patrickmn/go-cache"
 	"testing"
 	"time"
+
+	gocache "github.com/patrickmn/go-cache"
 )
 
 func TestNewDefaultFusionCache(t *testing.T) {

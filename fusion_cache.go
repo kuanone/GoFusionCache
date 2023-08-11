@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	gocache "github.com/patrickmn/go-cache"
-	"github.com/redis/go-redis/v9"
 	"reflect"
 	"time"
+
+	gocache "github.com/patrickmn/go-cache"
+	"github.com/redis/go-redis/v9"
 )
 
-var ErrMemoryNotFound = errors.New("memory not found")
-var ErrRedisNotFound = errors.New("redis not found")
+var (
+	ErrMemoryNotFound = errors.New("memory not found")
+	ErrRedisNotFound  = errors.New("redis not found")
+)
 
 type Cache[K comparable, V any] interface {
 	GetItem(context.Context, K) (V, error)
@@ -39,11 +42,12 @@ func New[K comparable, V any](mc MemoryCache[K, V], rc RedisCache[K, V]) *Fusion
 
 func (fc *FusionCache[K, V]) Get(c context.Context, k K, loaders ...Loader[K, V]) (V, error) {
 	v, err := fc.mc.GetItem(c, k)
-	if err != nil && !errors.Is(err, ErrMemoryNotFound) {
-		return v, err
-	}
-	if reflect.ValueOf(v).Interface() != nil {
+	if err == nil {
 		return v, nil
+	}
+
+	if !errors.Is(err, ErrMemoryNotFound) {
+		return v, err
 	}
 
 	v, err = fc.rc.GetItem(c, k)
