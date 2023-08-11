@@ -1,4 +1,4 @@
-module github.com/kuanone/go-fusion-cache
+module github.com/kuanone/GoFusionCache
 
 go 1.21.0
 
