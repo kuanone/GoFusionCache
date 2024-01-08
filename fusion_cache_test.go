@@ -22,7 +22,7 @@ func TestNewDefaultFusionCache(t *testing.T) {
 		{
 			name: "test",
 			args: args{
-				dsn:               "redis://:@127.0.0.1:6379/0",
+				dsn:               "redis://:@127.0.0.1:6379/0?pool_size=100&min_idle_conns=10",
 				defaultExpiration: gocache.DefaultExpiration,
 				cleanupInterval:   gocache.DefaultExpiration,
 			},
@@ -32,8 +32,9 @@ func TestNewDefaultFusionCache(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewDefaultFusionCache(tt.args.dsn, tt.args.defaultExpiration, tt.args.cleanupInterval)
-			t.Log(got.Set(context.Background(), "test", "test"))
+			// t.Log(got.Set(context.Background(), "test", "test"))
 			t.Log(got.Get(context.Background(), "test"))
+			t.Log(got.Del(context.Background(), "test1"))
 		})
 	}
 }

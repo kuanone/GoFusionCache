@@ -19,6 +19,7 @@ var (
 type Cache[K comparable, V any] interface {
 	GetItem(context.Context, K) (V, error)
 	SetItem(context.Context, K, V) error
+	DelItem(context.Context, K) error
 }
 
 type MemoryCache[K comparable, V any] interface {
@@ -87,6 +88,18 @@ func (fc *FusionCache[K, V]) Set(c context.Context, k K, v V) error {
 	return nil
 }
 
+func (fc *FusionCache[K, V]) Del(c context.Context, k K) error {
+	err := fc.mc.DelItem(c, k)
+	if err != nil {
+		return err
+	}
+	err = fc.rc.DelItem(c, k)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type DefaultMemoryCacheImpl[K comparable, V any] struct {
 	c *gocache.Cache
 }
@@ -99,8 +112,13 @@ func (d DefaultMemoryCacheImpl[K, V]) GetItem(c context.Context, k string) (stri
 	return v.(string), nil
 }
 
-func (d DefaultMemoryCacheImpl[K, V]) SetItem(c context.Context, k string, v string) error {
+func (d DefaultMemoryCacheImpl[K, V]) SetItem(c context.Context, k, v string) error {
 	d.c.Set(k, v, gocache.NoExpiration)
+	return nil
+}
+
+func (d DefaultMemoryCacheImpl[K, V]) DelItem(c context.Context, k string) error {
+	d.c.Delete(k)
 	return nil
 }
 
@@ -116,8 +134,16 @@ func (d DefaultRedisCacheImpl[K, V]) GetItem(c context.Context, k string) (strin
 	return v, nil
 }
 
-func (d DefaultRedisCacheImpl[K, V]) SetItem(c context.Context, k string, v string) error {
+func (d DefaultRedisCacheImpl[K, V]) SetItem(c context.Context, k, v string) error {
 	err := d.r.Set(c, k, v, -1).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d DefaultRedisCacheImpl[K, V]) DelItem(c context.Context, k string) error {
+	err := d.r.Del(c, k).Err()
 	if err != nil {
 		return err
 	}
